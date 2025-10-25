@@ -74,6 +74,8 @@ func main() {
 		{
 			adminProtected.GET("/appointments", h.GetAppointments)
 			adminProtected.GET("/classes", h.GetClasses)
+			adminProtected.PUT("/appointments/:id/status", h.UpdateAppointmentStatus)
+			adminProtected.PUT("/classes/:id/status", h.UpdateClassStatus)
 		}
 	}
 
@@ -92,6 +94,8 @@ func main() {
 	log.Printf("  POST /api/admin/login - Admin login")
 	log.Printf("  GET /api/admin/appointments - Get appointments (requires auth)")
 	log.Printf("  GET /api/admin/classes - Get classes (requires auth)")
+	log.Printf("  PUT /api/admin/appointments/:id/status - Update appointment status (requires auth)")
+	log.Printf("  PUT /api/admin/classes/:id/status - Update class status (requires auth)")
 
 	if err := r.Run(":" + port); err != nil {
 		log.Fatalf("Failed to start server: %v", err)

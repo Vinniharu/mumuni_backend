@@ -158,3 +158,65 @@ func (db *Database) GetAdminPasswordHash(ctx context.Context, email string) (str
 
 	return result[0].PasswordHash, nil
 }
+
+// Update appointment status
+func (db *Database) UpdateAppointmentStatus(ctx context.Context, appointmentID int, status string) (*models.Appointment, error) {
+	// Validate status
+	validStatuses := map[string]bool{
+		"pending":   true,
+		"confirmed": true,
+		"cancelled": true,
+		"completed": true,
+	}
+
+	if !validStatuses[status] {
+		return nil, fmt.Errorf("invalid status: %s", status)
+	}
+
+	updateData := map[string]interface{}{
+		"status": status,
+	}
+
+	var result []models.Appointment
+	_, err := db.client.From("appointments").Update(updateData, "", "").Eq("id", fmt.Sprintf("%d", appointmentID)).ExecuteTo(&result)
+	if err != nil {
+		return nil, fmt.Errorf("failed to update appointment status: %w", err)
+	}
+
+	if len(result) == 0 {
+		return nil, fmt.Errorf("appointment not found")
+	}
+
+	return &result[0], nil
+}
+
+// Update class status
+func (db *Database) UpdateClassStatus(ctx context.Context, classID int, status string) (*models.Class, error) {
+	// Validate status
+	validStatuses := map[string]bool{
+		"pending":   true,
+		"confirmed": true,
+		"cancelled": true,
+		"completed": true,
+	}
+
+	if !validStatuses[status] {
+		return nil, fmt.Errorf("invalid status: %s", status)
+	}
+
+	updateData := map[string]interface{}{
+		"status": status,
+	}
+
+	var result []models.Class
+	_, err := db.client.From("classes").Update(updateData, "", "").Eq("id", fmt.Sprintf("%d", classID)).ExecuteTo(&result)
+	if err != nil {
+		return nil, fmt.Errorf("failed to update class status: %w", err)
+	}
+
+	if len(result) == 0 {
+		return nil, fmt.Errorf("class not found")
+	}
+
+	return &result[0], nil
+}

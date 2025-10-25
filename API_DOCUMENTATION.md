@@ -288,6 +288,102 @@ Authorization: Bearer <jwt_token>
 }
 ```
 
+### Update Appointment Status (Admin Only)
+**PUT** `/api/admin/appointments/:id/status`
+
+Updates the status of a specific appointment. Requires admin authentication.
+
+#### Headers
+```
+Authorization: Bearer <jwt_token>
+```
+
+#### URL Parameters
+- `id` (integer) - The appointment ID
+
+#### Request Body
+```json
+{
+  "status": "string (required, one of: pending, confirmed, cancelled, completed)"
+}
+```
+
+#### Example Request
+```json
+{
+  "status": "confirmed"
+}
+```
+
+#### Response
+```json
+{
+  "success": true,
+  "message": "Appointment status updated successfully",
+  "data": {
+    "id": 123,
+    "name": "Sarah Johnson",
+    "email": "sarah@email.com",
+    "phone": "+234-123-456-7890",
+    "appointment_date": "2024-02-15",
+    "appointment_time": "2:00 PM",
+    "service": "Bridal Makeup",
+    "message": "Wedding on March 1st, need trial session",
+    "status": "confirmed",
+    "created_at": "2024-01-15T10:30:00Z",
+    "updated_at": "2024-01-15T10:30:00Z"
+  }
+}
+```
+
+### Update Class Status (Admin Only)
+**PUT** `/api/admin/classes/:id/status`
+
+Updates the status of a specific class enrollment. Requires admin authentication.
+
+#### Headers
+```
+Authorization: Bearer <jwt_token>
+```
+
+#### URL Parameters
+- `id` (integer) - The class ID
+
+#### Request Body
+```json
+{
+  "status": "string (required, one of: pending, confirmed, cancelled, completed)"
+}
+```
+
+#### Example Request
+```json
+{
+  "status": "confirmed"
+}
+```
+
+#### Response
+```json
+{
+  "success": true,
+  "message": "Class status updated successfully",
+  "data": {
+    "id": 456,
+    "name": "Maria Garcia",
+    "email": "maria@email.com",
+    "phone": "+234-987-654-3210",
+    "class_type": "Beginner Basics",
+    "experience_level": "Complete Beginner",
+    "goals": "Want to learn basic makeup for personal use",
+    "preferred_schedule": "Weekends",
+    "status": "confirmed",
+    "created_at": "2024-01-15T10:30:00Z",
+    "updated_at": "2024-01-15T10:30:00Z"
+  }
+}
+```
+
 ---
 
 ## 🔧 Utility Endpoints
@@ -447,6 +543,62 @@ const getAppointments = async () => {
     return result.appointments;
   } catch (error) {
     console.error('Error fetching appointments:', error);
+    throw error;
+  }
+};
+```
+
+#### Update Appointment Status (Admin)
+```javascript
+const updateAppointmentStatus = async (appointmentId, status) => {
+  try {
+    const token = localStorage.getItem('adminToken');
+    const response = await fetch(`/api/admin/appointments/${appointmentId}/status`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ status }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to update appointment status');
+    }
+
+    const result = await response.json();
+    console.log('Appointment status updated:', result);
+    return result;
+  } catch (error) {
+    console.error('Error updating appointment status:', error);
+    throw error;
+  }
+};
+```
+
+#### Update Class Status (Admin)
+```javascript
+const updateClassStatus = async (classId, status) => {
+  try {
+    const token = localStorage.getItem('adminToken');
+    const response = await fetch(`/api/admin/classes/${classId}/status`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ status }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to update class status');
+    }
+
+    const result = await response.json();
+    console.log('Class status updated:', result);
+    return result;
+  } catch (error) {
+    console.error('Error updating class status:', error);
     throw error;
   }
 };

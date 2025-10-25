@@ -5,6 +5,7 @@ import (
 	"mumuni_backend/auth"
 	"mumuni_backend/models"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -141,5 +142,105 @@ func (h *Handlers) GetClasses(c *gin.Context) {
 		"success": true,
 		"classes": classes,
 		"count":   len(classes),
+	})
+}
+
+// UpdateAppointmentStatus handles PUT /api/admin/appointments/:id/status
+func (h *Handlers) UpdateAppointmentStatus(c *gin.Context) {
+	// Get appointment ID from URL parameter
+	appointmentIDStr := c.Param("id")
+	appointmentID, err := strconv.Atoi(appointmentIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{
+			Error: "Invalid appointment ID",
+		})
+		return
+	}
+
+	// Parse request body
+	var req models.StatusUpdateRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{
+			Error: "Invalid request data: " + err.Error(),
+		})
+		return
+	}
+
+	// Update appointment status
+	appointment, err := h.db.UpdateAppointmentStatus(c.Request.Context(), appointmentID, req.Status)
+	if err != nil {
+		log.Printf("Error updating appointment status: %v", err)
+		if err.Error() == "appointment not found" {
+			c.JSON(http.StatusNotFound, models.ErrorResponse{
+				Error: "Appointment not found",
+			})
+			return
+		}
+		if err.Error() == "invalid status: "+req.Status {
+			c.JSON(http.StatusBadRequest, models.ErrorResponse{
+				Error: "Invalid status. Must be one of: pending, confirmed, cancelled, completed",
+			})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
+			Error: "Failed to update appointment status",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, models.StatusUpdateResponse{
+		Success: true,
+		Message: "Appointment status updated successfully",
+		Data:    appointment,
+	})
+}
+
+// UpdateClassStatus handles PUT /api/admin/classes/:id/status
+func (h *Handlers) UpdateClassStatus(c *gin.Context) {
+	// Get class ID from URL parameter
+	classIDStr := c.Param("id")
+	classID, err := strconv.Atoi(classIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{
+			Error: "Invalid class ID",
+		})
+		return
+	}
+
+	// Parse request body
+	var req models.StatusUpdateRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{
+			Error: "Invalid request data: " + err.Error(),
+		})
+		return
+	}
+
+	// Update class status
+	class, err := h.db.UpdateClassStatus(c.Request.Context(), classID, req.Status)
+	if err != nil {
+		log.Printf("Error updating class status: %v", err)
+		if err.Error() == "class not found" {
+			c.JSON(http.StatusNotFound, models.ErrorResponse{
+				Error: "Class not found",
+			})
+			return
+		}
+		if err.Error() == "invalid status: "+req.Status {
+			c.JSON(http.StatusBadRequest, models.ErrorResponse{
+				Error: "Invalid status. Must be one of: pending, confirmed, cancelled, completed",
+			})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
+			Error: "Failed to update class status",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, models.StatusUpdateResponse{
+		Success: true,
+		Message: "Class status updated successfully",
+		Data:    class,
 	})
 }

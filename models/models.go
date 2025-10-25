@@ -110,3 +110,15 @@ type SuccessResponse struct {
 	Success bool   `json:"success"`
 	Message string `json:"message"`
 }
+
+// StatusUpdateRequest represents the request payload for updating status
+type StatusUpdateRequest struct {
+	Status string `json:"status" binding:"required"`
+}
+
+// StatusUpdateResponse represents the response for status updates
+type StatusUpdateResponse struct {
+	Success bool        `json:"success"`
+	Message string      `json:"message"`
+	Data    interface{} `json:"data"`
+}
